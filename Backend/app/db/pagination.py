@@ -39,7 +39,7 @@ def execute_paginated_query(*,from_clause: str, order_by: str, page: int = 1, pa
         {**query_params, "limit": page_size, "offset": offset},
     )
     return paginated_response(
-        items,
+        items=items,
         page=page,
         page_size=page_size,
         total=total,

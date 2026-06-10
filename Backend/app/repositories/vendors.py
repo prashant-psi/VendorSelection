@@ -1,5 +1,4 @@
 from typing import Any
-from unicodedata import category
 
 from app.db.connection import execute_query
 from app.db.pagination import execute_paginated_query
