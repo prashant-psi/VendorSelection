@@ -1,5 +1,7 @@
 /venv/
 .env
+.env.*
+!.env.example
 .vscode/
 
 # Python bytecode cache (auto-created when you run the app)

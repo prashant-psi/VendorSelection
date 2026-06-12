@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from Backend.app.api.routes import utils_routes
+from app.api.routes import utils_routes
 from app.api.routes import user_routes
 from app.api.routes import vendor_routes
 

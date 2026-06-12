@@ -1,14 +1,11 @@
 from typing import Any
-
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Result
+from app.config import vendor_connection_url
 
-
-DEFAULT_DATABASE_URL = (
-    "postgresql+psycopg2://postgres:postgres@ps-win-ds-288:5432/VendorPlatform"
-)
 engine = create_engine(
-    DEFAULT_DATABASE_URL
+    vendor_connection_url,
+    pool_pre_ping=True,
 )
 
 

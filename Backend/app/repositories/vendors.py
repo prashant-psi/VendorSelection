@@ -22,6 +22,9 @@ def get_vendor(vendor_id : str) -> list[dict[str, Any]]:
         "vendor_id": vendor_id
     })
 
+def get_vendors_by_ids(vendors_ids:list[str]) -> list[dict[str, Any]]:
+    return execute_query("select * from vendor.vendors where vendor_id = ANY(CAST(:vendors_ids AS uuid[]))",{"vendors_ids": vendors_ids})
+
 
 def get_vendors_by_limit(limit:int) -> list[dict[str, Any]]:
     return execute_query(SQL_GET_VENDOR_BY_LIMIT,
@@ -53,12 +56,12 @@ def get_vendor_recommendations(page:int =1 , page_size:int =20) -> dict[str, Any
     
 #Vendor Categories
 
-def get_vendor_categories(page:int =1 , page_size:int =20) -> dict[str, Any]:
-    return execute_paginated_query(
-        from_clause="vendor.vendor_categories",
-        order_by="category_id",
-        page=page,
-        page_size=page_size,
-    )
+def categories() -> list[dict[str, Any]]:
+    return execute_query("select distinct category_name from vendor.vendor_categories")
 
+def get_vendor_by_category_names(category_names: list[str])->list[dict[str, Any]]:
+    return execute_query("select * from vendor.vendor_categories where category_name = ANY(CAST(:category_names AS varchar[]))",{"category_names": category_names})
 
+#vendor production capacity by vendor id
+def get_vendor_production_capacity(vendor_id:str)->list[dict[str, Any]]:
+    return execute_query("select * from vendor.production_capacity where vendor_id =:vendor_id",{"vendor_id": vendor_id})
