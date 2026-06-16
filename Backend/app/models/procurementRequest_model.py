@@ -8,3 +8,5 @@ class ProcurementRequestModel(BaseModel):
     quality_grade:str|None = Field(None, description="Quality Grade")
     preferred_countries:list[str]|None = Field(None, description="Preferred Countries")
     excluded_countries:list[str]|None = Field(None, description="Excluded Countries")
+    weight_config_id:str|None = Field(None, description="Scoring weight configuration ID")
+    use_ml:bool = Field(True, description="Use XGBoost model when available")
