@@ -1,24 +1,17 @@
 from pydantic import BaseModel, Field
 
 
-class ChatRequestModel(BaseModel):
-    """Request body from the UI chat screen."""
+class ChatRequest(BaseModel):
+    """API input — user sends plain text only."""
 
-    message: str = Field(..., description="User question or command")
-    session_id: str | None = Field(None, description="Optional session id to keep conversation context")
-    # Optional — users normally type names in message; IDs only if UI already has them
-    product_id: str | None = Field(None, description="Product UUID (optional)")
-    product_name: str | None = Field(None, description="Product name (optional)")
-    product_code: str | None = Field(None, description="Product code e.g. PRD-00217 (optional)")
-    vendor_id: str | None = Field(None, description="Vendor UUID (optional)")
-    vendor_name: str | None = Field(None, description="Vendor name (optional)")
-    request_id: str | None = Field(None, description="Procurement request id in context")
+    message: str = Field(..., min_length=1 , description="Natural language message from the user")
+    session_id: str | None = Field(None, description="Return from previous response to continue the conversation")
 
 
 class ChatResponseModel(BaseModel):
-    """Response sent back to the UI."""
+    """API response."""
 
-    reply: str = Field(..., description="Natural language answer from the assistant")
-    session_id: str = Field(..., description="Session id — send this back on the next message")
-    data: dict | list | None = Field(None, description="Structured scores, rankings, or predictions when available")
-    actions: list[str] = Field(default_factory=list, description="Which backend actions were run, e.g. rank_vendors")
+    reply: str
+    session_id: str
+    data: dict | list | None = None
+    actions: list[str] = Field(default_factory=list)

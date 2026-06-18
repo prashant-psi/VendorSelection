@@ -5,7 +5,20 @@ from app.db.pagination import execute_paginated_query
 
 SQL_GET_VENDOR = "SELECT * FROM vendor.vendors WHERE vendor_id = :vendor_id"
 
-SQL_GET_VENDOR_BY_LIMIT = "SELECT * FROM vendor.vendors LIMIT :limit"
+
+SQL_GET_RECOMMENDATIONS_BY_REQUEST = """
+    SELECT *
+    FROM vendor.vendor_recommendations
+    WHERE request_id = :request_id
+    ORDER BY rank
+"""
+
+SQL_GET_HISTORICAL_PERFORMANCE = """
+    SELECT *
+    FROM vendor.vendor_historical_performance
+    WHERE vendor_id = :vendor_id
+    ORDER BY period_year DESC, period_month DESC
+"""
 
 #To GET vendors (paginated)
 def get_vendors(page: int = 1, page_size: int = 20) -> dict[str, Any]:
@@ -24,13 +37,6 @@ def get_vendor(vendor_id : str) -> list[dict[str, Any]]:
 
 def get_vendors_by_ids(vendors_ids:list[str]) -> list[dict[str, Any]]:
     return execute_query("select * from vendor.vendors where vendor_id = ANY(CAST(:vendors_ids AS uuid[]))",{"vendors_ids": vendors_ids})
-
-
-def get_vendors_by_limit(limit:int) -> list[dict[str, Any]]:
-    return execute_query(SQL_GET_VENDOR_BY_LIMIT,
-    {
-        "limit": limit
-    })
 
 
 #Vendor Products
@@ -53,6 +59,13 @@ def get_vendor_recommendations(page:int =1 , page_size:int =20) -> dict[str, Any
         page_size=page_size,
     )
 
+def get_recommendations_by_request(request_id: str) -> list[dict[str, Any]]:
+    return execute_query(SQL_GET_RECOMMENDATIONS_BY_REQUEST, {"request_id": request_id})
+    
+
+# Vendor Historical Performance
+def get_historical_performance(vendor_id: str) -> list[dict[str, Any]]:
+    return execute_query(SQL_GET_HISTORICAL_PERFORMANCE, {"vendor_id": vendor_id})
     
 #Vendor Categories
 

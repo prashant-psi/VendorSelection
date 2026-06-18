@@ -1,0 +1,25 @@
+{
+  "model_file": "vendor_ranker.pkl",
+  "model_format": "pickle",
+  "trained_at": "2026-06-16T09:31:29.116497+00:00",
+  "rows_used": 1000,
+  "feature_columns": [
+    "overall_quality_score",
+    "overall_risk_score",
+    "overall_esg_score",
+    "reliability_score",
+    "historical_score",
+    "historical_otd_rate",
+    "historical_quality_rate",
+    "historical_csat_score",
+    "on_time_rate",
+    "avg_fill_rate_pct",
+    "available_capacity",
+    "current_utilization_pct",
+    "compliance_cert_count",
+    "tier",
+    "is_preferred",
+    "is_strategic"
+  ],
+  "target_column": "target_score"
+}

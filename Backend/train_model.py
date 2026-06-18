@@ -14,10 +14,10 @@ Usage (from Backend folder):
     .\\venv\\Scripts\\python.exe train_model.py
 
 Or via API while the server is running:
-    POST http://localhost:8000/api/v1/scoring/train
+    POST http://localhost:8000/api/v1/model/train
 
 Check model status:
-    GET http://localhost:8000/api/v1/scoring/model/status
+    GET http://localhost:8000/api/v1/model/status
 """
 
 import json
@@ -30,7 +30,7 @@ if str(_BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(_BACKEND_DIR))
 
 from app.ml import xgboost_scorer
-from app.repositories import scoring
+from app.repositories import ml_training
 
 
 def main() -> int:
@@ -39,7 +39,7 @@ def main() -> int:
     print("=" * 60)
 
     print("\nLoading training data from database...")
-    training_rows = scoring.get_ml_training_data()
+    training_rows = ml_training.get_ml_training_data()
     print(f"Rows found: {len(training_rows)}")
 
     if not training_rows:

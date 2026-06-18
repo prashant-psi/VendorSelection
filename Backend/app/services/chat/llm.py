@@ -2,10 +2,9 @@ from langchain_openai import AzureChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 
-from app.config import settings
-from app.services.chat_tools import CHAT_TOOLS
+from app.core.config import settings
+from app.services.chat.tools import CHAT_TOOLS
 
-# System prompt for the procurement assistant
 SYSTEM_PROMPT = """You are a procurement assistant for a Vendor Selection platform.
 
 Users refer to products by NAME or PRODUCT CODE (e.g. PRD-00217), never by UUID.
@@ -21,16 +20,17 @@ When the user mentions a product, pass product_code to tools if given (e.g. PRD-
 For rank_vendors or predict_vendors, use product_code when available — it is unique.
 Use search_products only when you need to look up a product without a code.
 
+If [Context] includes ranking_already_computed=true, summarize that ranking in your reply
+and do not call rank_vendors or predict_vendors again.
+
 Always explain results clearly in plain language for a business user.
 Keep answers concise and actionable."""
 
-# LangGraph memory — stores conversation per session_id (thread_id)
 _memory = MemorySaver()
 _agent = None
 
 
 def get_llm() -> AzureChatOpenAI:
-    """Azure OpenAI chat model via LangChain."""
     return AzureChatOpenAI(
         azure_endpoint=settings.AZURE_OPENAI_ENDPOINT,
         api_key=settings.AZURE_OPENAI_API_KEY,
@@ -41,16 +41,10 @@ def get_llm() -> AzureChatOpenAI:
 
 
 def get_agent():
-    """
-    LangGraph ReAct agent: LLM -> tool call -> backend scoring/ML -> LLM -> answer.
-
-    Recreated when tools change (call reload_agent after updating CHAT_TOOLS).
-    """
     global _agent
     if _agent is None:
-        llm = get_llm()
         _agent = create_react_agent(
-            llm,
+            get_llm(),
             CHAT_TOOLS,
             checkpointer=_memory,
             prompt=SYSTEM_PROMPT,
@@ -59,6 +53,5 @@ def get_agent():
 
 
 def reload_agent() -> None:
-    """Force rebuild of the LangGraph agent (e.g. after tool changes)."""
     global _agent
     _agent = None

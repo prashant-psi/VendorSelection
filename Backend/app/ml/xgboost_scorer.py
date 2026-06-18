@@ -7,6 +7,8 @@ from typing import Any
 import numpy as np
 import xgboost as xgb
 
+from app.core.numeric import to_float
+
 MODEL_DIR = Path(__file__).resolve().parent / "models"
 MODEL_PATH = MODEL_DIR / "vendor_ranker.pkl"
 META_PATH = MODEL_DIR / "vendor_ranker.meta.json"
@@ -34,17 +36,9 @@ TARGET_COLUMN = "target_score"
 MIN_TRAINING_ROWS = 5
 
 
-def _to_float(value: Any) -> float:
-    if value is None:
-        return 0.0
-    if isinstance(value, bool):
-        return float(value)
-    return float(value)
-
-
 def _rows_to_matrix(rows: list[dict[str, Any]], columns: list[str]) -> np.ndarray:
     return np.array(
-        [[_to_float(row.get(column)) for column in columns] for row in rows],
+        [[to_float(row.get(column)) for column in columns] for row in rows],
         dtype=np.float32,
     )
 
@@ -109,7 +103,7 @@ def train_model(training_rows: list[dict[str, Any]]) -> dict[str, Any]:
 
     features = _rows_to_matrix(training_rows, FEATURE_COLUMNS)
     targets = np.array(
-        [_to_float(row.get(TARGET_COLUMN)) for row in training_rows],
+        [to_float(row.get(TARGET_COLUMN)) for row in training_rows],
         dtype=np.float32,
     )
 
@@ -153,7 +147,6 @@ def predict_vendor_scores(vendors: list[dict[str, Any]]) -> list[dict[str, Any]]
     for vendor, score in zip(vendors, predictions):
         vendor_result = dict(vendor)
         vendor_result["ml_score"] = round(float(score), 4)
-        vendor_result["final_score"] = vendor_result["ml_score"]
         vendor_result["scoring_method"] = "xgboost"
         scored_vendors.append(vendor_result)
 
