@@ -13,10 +13,10 @@ SQL_ELIGIBLE_VENDOR_PRODUCTS = """
       AND vp.is_active = true
       AND v.is_active = true
       AND v.blacklist_flag = false
-      AND (:min_qty IS NULL OR vp.min_order_qty IS NULL OR vp.min_order_qty <= :min_qty)
-      AND (:max_qty IS NULL OR vp.max_order_qty IS NULL OR vp.max_order_qty >= :max_qty)
-      AND (:budget IS NULL OR :required_quantity IS NULL OR (vp.unit_price * :required_quantity) <= :budget)
-      AND (:max_lead_days IS NULL OR vp.lead_time_days <= :max_lead_days)
+      AND (CAST(:min_qty AS numeric) IS NULL OR vp.min_order_qty IS NULL OR vp.min_order_qty <= :min_qty)
+      AND (CAST(:max_qty AS numeric) IS NULL OR vp.max_order_qty IS NULL OR vp.max_order_qty >= :max_qty)
+      AND (CAST(:budget AS numeric) IS NULL OR CAST(:required_quantity AS numeric) IS NULL OR (vp.unit_price * :required_quantity) <= :budget)
+      AND (CAST(:max_lead_days AS integer) IS NULL OR vp.lead_time_days <= :max_lead_days)
 """
 
 SQL_VENDOR_METRIC_ROWS = """
