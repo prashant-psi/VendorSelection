@@ -52,29 +52,24 @@ def extract_fields_from_message(message: str,previous: dict[str, Any]) ->LlmExtr
 
 def _regex_enrich(extracted: LlmExtractedFields, message: str) -> LlmExtractedFields:
     updates: dict[str, Any] = {}
-    if not extracted.product_code:
-        code = extract_product_code(message)
-        if code:
-            updates["product_code"] = code
-    if not extracted.product_name:
-        name = extract_product_name(message)
-        if name:
-            updates["product_name"] = name
-    if not extracted.required_quantity:
-        qty = extract_required_quantity(message, None)
-        if qty:
-            updates["required_quantity"] = qty
-    if extracted.budget_usd is None:
-        budget = extract_budget_usd(message, None)
-        if budget is not None:
-            updates["budget_usd"] = budget
-    if not extracted.run_ranking and wants_vendor_ranking(message):
+    code = extract_product_code(message)
+    if code:
+        updates["product_code"] = code
+    name = extract_product_name(message)
+    if name:
+        updates["product_name"] = name
+    qty = extract_required_quantity(message, None)
+    if qty:
+        updates["required_quantity"] = qty
+    budget = extract_budget_usd(message, None)
+    if budget is not None:
+        updates["budget_usd"] = budget
+    limit = extract_result_limit(message, None)
+    if limit:
+        updates["result_limit"] = limit
+    if wants_vendor_ranking(message):
         updates["run_ranking"] = True
         updates["intent"] = "vendor_ranking"
-    if extracted.result_limit is None:
-        limit = extract_result_limit(message, None)
-        if limit:
-            updates["result_limit"] = limit
     return extracted.model_copy(update=updates) if updates else extracted
 
 
@@ -97,8 +92,14 @@ def to_session_fields(extracted: LlmExtractedFields, message: str) -> dict[str, 
     return fields
 
 
-def wants_ranking(fields: dict[str, Any]) -> bool:
-    return bool(fields.get("run_ranking") or fields.get("intent") in ("vendor_ranking", "vendor_prediction"))
+def should_attempt_ranking(
+    message: str,
+    extracted: LlmExtractedFields,
+    previous: dict[str, Any],
+) -> bool:
+    if wants_vendor_ranking(message) or extracted.run_ranking:
+        return True
+    return bool(previous.get("ranking_in_progress"))
 
 
 def missing_for_ranking(fields: dict[str, Any]) -> list[str]:
