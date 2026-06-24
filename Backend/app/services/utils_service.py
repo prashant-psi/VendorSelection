@@ -57,3 +57,7 @@ def get_weight_config(config_id: str) -> list[dict[str, Any]]:
 
 def get_default_weight_config() -> list[dict[str, Any]]:
     return utils.get_default_weight_config()
+
+
+def get_categories() -> list[dict[str, Any]]:
+    return utils.get_categories()

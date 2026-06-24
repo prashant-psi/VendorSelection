@@ -24,7 +24,6 @@ def handle_chat(request: ChatRequest) -> ChatResponseModel:
 
     previous = get_session_fields(session_id)
 
-    # Extract fields from message by the LLM
     extracted_fields = extract_fields_from_message(request.message, previous)
 
     fields = merge_session_fields(session_id, to_session_fields(extracted_fields, request.message))
@@ -71,7 +70,8 @@ def _general_chat_reply(message: str, fields: dict[str, Any], session_id: str) -
             {"messages": [HumanMessage(content=user_content)]},
             config={"configurable": {"thread_id": session_id}},
         )
-        reply = _extract_reply(result.get("messages", []))
+        messages = result.get("messages", [])
+        reply = next((m.content for m in reversed(messages) if isinstance(m, AIMessage) and m.content), "I could not generate a response.")
     except Exception:
         reply = "How can I help you with vendor selection or procurement?"
 
@@ -82,16 +82,3 @@ def _general_chat_reply(message: str, fields: dict[str, Any], session_id: str) -
         data=serialize_response(tool_data),
         actions=tool_actions,
     )
-
-
-def _extract_reply(messages: list[Any]) -> str:
-    for message in reversed(messages):
-        if isinstance(message, AIMessage) and message.content:
-            content = message.content
-            if isinstance(content, str):
-                return content
-            if isinstance(content, list):
-                parts = [p.get("text", "") for p in content if isinstance(p, dict) and p.get("type") == "text"]
-                if parts:
-                    return "".join(parts)
-    return "I could not generate a response."

@@ -103,8 +103,8 @@ def wants_ranking(fields: dict[str, Any]) -> bool:
 
 def missing_for_ranking(fields: dict[str, Any]) -> list[str]:
     missing: list[str] = []
-    if not (fields.get("product_name") or fields.get("product_id")):
-        missing.append("product name")
+    if not (fields.get("product_name") or fields.get("product_id") or fields.get("product_code")):
+        missing.append("product name or code")
     if not fields.get("required_quantity"):
         missing.append("quantity (how many units)")
     return missing

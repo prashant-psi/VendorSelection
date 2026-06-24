@@ -10,6 +10,8 @@ def get_vendors(page: int = 1, page_size: int = 20) -> dict[str, Any]:
 def get_vendor(vendor_id: str) -> list[dict[str, Any]]:
     return vendors.get_vendor(vendor_id)
 
+def get_vendor_by_name(vendor_name: str) -> list[dict[str, Any]]:
+    return vendors.get_vendor_by_name(vendor_name.strip())
 
 def get_vendors_by_ids(vendors_ids: list[str]) -> list[dict[str, Any]]:
     return vendors.get_vendors_by_ids(vendors_ids)
@@ -41,10 +43,6 @@ def get_risk_scores(vendor_id: str) -> list[dict[str, Any]]:
 
 def get_historical_performance(vendor_id: str) -> list[dict[str, Any]]:
     return vendors.get_historical_performance(vendor_id)
-
-
-def get_categories() -> list[dict[str, Any]]:
-    return vendors.categories()
 
 
 def get_vendor_by_category_names(category_names: list[str]) -> list[dict[str, Any]]:

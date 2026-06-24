@@ -107,3 +107,6 @@ def get_quality_scores(vendor_id: str) -> list[dict[str, Any]]:
 
 def get_risk_scores(vendor_id: str) -> list[dict[str, Any]]:
     return execute_query(SQL_GET_RISK_SCORES, {"vendor_id": vendor_id})
+
+def get_categories() -> list[dict[str, Any]]:
+    return execute_query("select distinct category_name from vendor.vendor_categories")

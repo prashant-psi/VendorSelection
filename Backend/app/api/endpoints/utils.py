@@ -72,3 +72,7 @@ def get_default_weight_config():
 def get_weight_config(config_id: str):
     return utils_service.get_weight_config(config_id)
 
+
+@router.get("/categories")
+def get_categories():
+    return utils_service.get_categories()

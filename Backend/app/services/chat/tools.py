@@ -171,62 +171,6 @@ def get_scoring_features(
     )
 
 
-@tool
-def get_vendor_latest_scores(vendor_name: str = "", vendor_id: str = "") -> str:
-    """Get latest aggregated vendor scores."""
-    ctx = get_chat_context()
-    if vendor_name or vendor_id or ctx.get("vendor_id") or ctx.get("vendor_name"):
-        vid, err = _resolve_vendor_or_error(vendor_id=vendor_id, vendor_name=vendor_name)
-        if err and (vendor_name or vendor_id or ctx.get("vendor_name")):
-            return err
-        return _save_tool_result("get_vendor_latest_scores", vendor_service.get_vendor_latest_scores(vid))
-    return _save_tool_result("get_vendor_latest_scores", vendor_service.get_vendor_latest_scores(None))
-
-
-@tool
-def get_quality_scores(vendor_name: str = "", vendor_id: str = "") -> str:
-    """Get quality score history for a vendor."""
-    vid, err = _resolve_vendor_or_error(vendor_id=vendor_id, vendor_name=vendor_name)
-    if err:
-        return err
-    return _save_tool_result("get_quality_scores", vendor_service.get_quality_scores(vid))
-
-
-@tool
-def get_risk_scores(vendor_name: str = "", vendor_id: str = "") -> str:
-    """Get risk score history for a vendor."""
-    vid, err = _resolve_vendor_or_error(vendor_id=vendor_id, vendor_name=vendor_name)
-    if err:
-        return err
-    return _save_tool_result("get_risk_scores", vendor_service.get_risk_scores(vid))
-
-
-@tool
-def get_seasonal_demand(product_name: str = "", product_code: str = "", product_id: str = "") -> str:
-    """Get demand forecast for a product. Prefer product_code when available."""
-    pid, err = _resolve_product_or_error(product_id=product_id, product_name=product_name, product_code=product_code)
-    if err:
-        return err
-    return _save_tool_result("get_seasonal_demand", utils_service.get_seasonal_demand(pid))
-
-
-@tool
-def get_recommendations(request_id: str = "") -> str:
-    """Get stored recommendations for a procurement request."""
-    ctx = get_chat_context()
-    rid = request_id or ctx.get("request_id")
-    if not rid:
-        return json.dumps({"error": "request_id is required"})
-    return _save_tool_result("get_recommendations", vendor_service.get_recommendations_by_request(rid))
-
-
-@tool
-def get_historical_performance(vendor_name: str = "", vendor_id: str = "") -> str:
-    """Get monthly historical performance for a vendor."""
-    vid, err = _resolve_vendor_or_error(vendor_id=vendor_id, vendor_name=vendor_name)
-    if err:
-        return err
-    return _save_tool_result("get_historical_performance", vendor_service.get_historical_performance(vid))
 
 
 CHAT_TOOLS = [
@@ -235,10 +179,4 @@ CHAT_TOOLS = [
     rank_vendors,
     predict_vendors,
     get_scoring_features,
-    get_vendor_latest_scores,
-    get_quality_scores,
-    get_risk_scores,
-    get_seasonal_demand,
-    get_recommendations,
-    get_historical_performance,
 ]

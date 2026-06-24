@@ -37,9 +37,9 @@ def resolve_products(
     code = (product_code or "").strip() or extract_product_code(product_name) or ""
     if code:
         matches = product_search.get_product_by_code(code)
-        if matches:
-            return [_format_product(matches[0])], None
-        return [], {"error": f"No product found with code '{code}'", "product_code": code}
+        if not matches:
+            return [], {"error": f"No product found with code '{code}'", "product_code": code}
+        return [_format_product(matches[0])], None
 
     name = (product_name or "").strip()
     if not name:

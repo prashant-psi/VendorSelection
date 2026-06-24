@@ -11,10 +11,9 @@ router = APIRouter(tags=["vendors"])
 def list_vendors(pagination: PaginationDep):
     return vendor_service.get_vendors(page=pagination.page, page_size=pagination.page_size)
 
-
-@router.get("/vendors/scores/latest")
-def get_vendor_latest_scores(vendor_id: str | None = None):
-    return vendor_service.get_vendor_latest_scores(vendor_id)
+@router.get("/vendor/{vendor_name}")
+def get_vendor_by_name(vendor_name: str):
+    return vendor_service.get_vendor_by_name(vendor_name)
 
 
 @router.post("/vendors/ids")
@@ -55,12 +54,6 @@ def get_vendor_recommendations(pagination: PaginationDep):
 @router.get("/vendor-recommendations/by-request/{request_id}")
 def get_recommendations_by_request(request_id: str):
     return vendor_service.get_recommendations_by_request(request_id)
-
-
-@router.get("/categories")
-def get_categories():
-    return vendor_service.get_categories()
-
 
 @router.post("/vendor-by-category")
 def get_vendor_categoey_by_vendors(requestBody: VendorByCategoryNamesRequestModel):
