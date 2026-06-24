@@ -8,8 +8,6 @@ _CODE_RE = re.compile(r"PRD-\d+", re.IGNORECASE)
 _session_store: dict[str, dict[str, Any]] = {}
 
 _FIELD_KEYS = (
-    "intent",
-    "run_ranking",
     "product_id",
     "product_name",
     "product_code",
@@ -22,6 +20,7 @@ _FIELD_KEYS = (
     "weight_config_id",
     "ml_blend_weight",
     "result_limit",
+    "ranking_in_progress",
     "last_message",
 )
 

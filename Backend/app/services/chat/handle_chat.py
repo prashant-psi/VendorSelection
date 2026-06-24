@@ -10,8 +10,8 @@ from app.services.chat.extractor import (
     build_follow_up,
     extract_fields_from_message,
     missing_for_ranking,
+    should_attempt_ranking,
     to_session_fields,
-    wants_ranking,
 )
 from app.services.chat.llm import get_agent
 from app.services.chat.session_state import get_session_fields, merge_session_fields
@@ -28,19 +28,24 @@ def handle_chat(request: ChatRequest) -> ChatResponseModel:
 
     fields = merge_session_fields(session_id, to_session_fields(extracted_fields, request.message))
 
-    if wants_ranking(fields):
-        missing = missing_for_ranking(fields)
-        if missing:
-            return ChatResponseModel(
-                reply=build_follow_up(missing, extracted_fields.follow_up_question),
-                session_id=session_id,
-                data={"collected": fields, "missing_fields": missing},
-                actions=["awaiting_fields"],
-            )
+    if not should_attempt_ranking(request.message, extracted_fields, previous):
+        merge_session_fields(session_id, {"ranking_in_progress": False})
+        return _general_chat_reply(request.message, fields, session_id)
 
-        ranking_response = rank_vendors(fields, session_id, request.message)
-        if ranking_response:
-            return ranking_response
+    missing = missing_for_ranking(fields)
+    if missing:
+        merge_session_fields(session_id, {"ranking_in_progress": True})
+        return ChatResponseModel(
+            reply=build_follow_up(missing, extracted_fields.follow_up_question),
+            session_id=session_id,
+            data={"collected": fields, "missing_fields": missing},
+            actions=["awaiting_fields"],
+        )
+
+    merge_session_fields(session_id, {"ranking_in_progress": False})
+    ranking_response = rank_vendors(fields, session_id, request.message)
+    if ranking_response:
+        return ranking_response
 
     return _general_chat_reply(request.message, fields, session_id)
 

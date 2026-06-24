@@ -69,18 +69,24 @@ def extract_result_limit(message: str, explicit: int | None = None) -> int | Non
 
 def build_procurement(fields: dict[str, Any]) -> tuple[ProcurementRequest | None, dict[str, Any] | None]:
     """Build procurement request from LLM-extracted session fields."""
-    product_code = fields.get("product_code") or extract_product_code(fields.get("last_message", ""))
+    message = fields.get("last_message", "") or ""
+    product_code = extract_product_code(message) or fields.get("product_code") or ""
+    product_name = extract_product_name(message) or fields.get("product_name") or ""
+    product_id = fields.get("product_id") or ""
+    if product_code or product_name:
+        product_id = ""
+
     products, product_error = resolve_products(
-        product_id=fields.get("product_id") or "",
-        product_name=fields.get("product_name") or "",
-        product_code=product_code or "",
+        product_id=product_id,
+        product_name=product_name,
+        product_code=product_code,
     )
     if product_error:
         return None, product_error
     if not products:
         return None, {"error": "No product found for the given name or code"}
 
-    quantity = fields.get("required_quantity") or extract_required_quantity(fields.get("last_message", ""))
+    quantity = extract_required_quantity(message, None) or fields.get("required_quantity")
     if not quantity:
         return None, {"error": "Required quantity is missing", "missing_fields": ["required_quantity"]}
 
