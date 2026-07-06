@@ -40,11 +40,19 @@ def rank_vendors(fields: dict[str, Any], session_id: str, message: str) -> ChatR
 
     rankings = ranking.get("rankings") or []
     if not rankings:
-        reply = "No vendors found for this product."
+        filter_advisory = ranking.get("filter_advisory")
+        if filter_advisory:
+            reply = filter_advisory["message"]
+        else:
+            reply = "No vendors found for this product."
     else:
         matched = (meta or {}).get("matched_products") or ranking.get("matched_products") or []
         sku_note = f" across {len(matched)} SKUs" if len(matched) > 1 else ""
         reply = f"Found {len(rankings)} vendor(s){sku_note}. See data for details."
+
+        advisory = ranking.get("quantity_advisory")
+        if advisory:
+            reply += f"\n\n{advisory['message']}"
 
     return ChatResponseModel(
         reply=reply,

@@ -2,19 +2,23 @@ from typing import Any
 
 from app.models.procurement_request import ProcurementRequest
 from app.repositories import vendor_scoring_data
+from app.services.procurement.filters import build_procurement_sql_filters
 
 
 def load_scoring_candidates(procurement_request: ProcurementRequest) -> list[dict]:
     """Load vendor metric rows that pass procurement filters for all matched products."""
     product_ids = procurement_request.product_ids or [procurement_request.product_id]
+    filters = build_procurement_sql_filters(
+        required_quantity=procurement_request.required_quantity,
+        budget_usd=procurement_request.budget_usd,
+        required_by_date=procurement_request.required_by_date,
+    )
     candidate_rows: list[dict] = []
 
     for product_id in product_ids:
         eligible_vendors = vendor_scoring_data.fetch_eligible_vendor_products(
             product_id,
-            required_quantity=procurement_request.required_quantity,
-            budget_usd=procurement_request.budget_usd,
-            required_by_date=procurement_request.required_by_date,
+            **filters,
         )
         eligible_vendors = _apply_country_filters(eligible_vendors, procurement_request)
 
@@ -38,11 +42,14 @@ def load_vendor_metrics_for_product(
     required_by_date: str | None = None,
 ) -> list[dict[str, Any]]:
     """Single-product metric load used by vendor-features API and chat tools."""
-    eligible_vendors = vendor_scoring_data.fetch_eligible_vendor_products(
-        product_id,
+    filters = build_procurement_sql_filters(
         required_quantity=required_quantity,
         budget_usd=budget_usd,
         required_by_date=required_by_date,
+    )
+    eligible_vendors = vendor_scoring_data.fetch_eligible_vendor_products(
+        product_id,
+        **filters,
     )
     vendor_ids = [vendor["vendor_id"] for vendor in eligible_vendors]
     return vendor_scoring_data.fetch_vendor_metric_rows(vendor_ids, product_id)

@@ -17,15 +17,8 @@ def get_product_by_code(product_code: str) -> list[dict[str, Any]]:
 
 
 def search_products(search_term: str, limit: int = 10) -> list[dict[str, Any]]:
-    """Find products by name, code, or category (case-insensitive)."""
+    """Find products by name, code, or category (case-insensitive fuzzy search)."""
     term = search_term.strip()
-
-    # Exact product code match first (e.g. PRD-00217)
-    if term.upper().startswith("PRD-"):
-        exact = get_product_by_code(term)
-        if exact:
-            return exact
-
     pattern = f"%{term}%"
     return execute_query(
         """

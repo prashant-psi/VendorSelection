@@ -36,6 +36,7 @@ def extract_node(state: ChatState) -> dict[str, Any]:
         "merged_fields": merged,
         "should_rank": should_rank,
         "missing_fields": missing,
+        "permissions": state["permissions"],
     }
 
 
@@ -52,19 +53,20 @@ def ask_missing_node(state: ChatState) -> dict[str, Any]:
     reply = build_follow_up(state["missing_fields"], extracted.follow_up_question)
     merge_session_fields(state["session_id"], {"ranking_in_progress": True})
     return {
+        "permissions": state["permissions"],
         "response": ChatResponseModel(
             reply=reply,
             session_id=state["session_id"],
             data={"collected": state["merged_fields"], "missing_fields": state["missing_fields"]},
             actions=["awaiting_fields"],
-        )
+        ),
     }
 
 
 def rank_node(state: ChatState) -> dict[str, Any]:
     merge_session_fields(state["session_id"], {"ranking_in_progress": False})
     response = rank_vendors(state["merged_fields"], state["session_id"], state["message"])
-    return {"response": response}
+    return {"permissions": state["permissions"], "response": response}
 
 
 def agent_node(state: ChatState) -> dict[str, Any]:
@@ -107,12 +109,13 @@ def agent_node(state: ChatState) -> dict[str, Any]:
 
     tool_actions, tool_data = get_tool_tracking()
     return {
+        "permissions": state["permissions"],
         "response": ChatResponseModel(
             reply=reply,
             session_id=session_id,
             data=serialize_response(tool_data),
             actions=tool_actions,
-        )
+        ),
     }
 
 

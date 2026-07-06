@@ -46,7 +46,7 @@ def _resolve_vendor_or_error(
 
 def _build_procurement_for_tool(
     product_id: str,
-    required_quantity: str = "1",
+    required_quantity: str = "",
     ml_blend_weight: float | None = 0.2,
 ) -> tuple[Any, str | None]:
     ctx = get_chat_context()

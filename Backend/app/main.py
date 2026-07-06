@@ -1,9 +1,22 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 
 from app.api.router import api_router
 
 app = FastAPI(title="Vendor Selection API", version="1.0.0")
+
+
+@app.exception_handler(ValidationError)
+async def validation_exception_handler(request: Request, exc: ValidationError) -> JSONResponse:
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": "Invalid request",
+            "details": exc.errors(include_url=False),
+        },
+    )
 
 # Allow frontend apps (Angular/React) on common dev ports to call the API
 app.add_middleware(

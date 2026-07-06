@@ -1,6 +1,11 @@
 from typing import Any, TypedDict
 
 
+class Permissions(TypedDict):
+    read_only: bool
+    allowed_operations: list[str]
+
+
 class ChatState(TypedDict):
     session_id: str
     message: str
@@ -10,3 +15,4 @@ class ChatState(TypedDict):
     missing_fields: list[str]
     should_rank: bool
     response: Any
+    permissions: Permissions

@@ -45,6 +45,12 @@ def resolve_products(
     if not name:
         return [], {"error": "Please mention the product name (e.g. Resistors Grade-A)"}
 
+    # If the name looks like a product code, try exact match before fuzzy search
+    if name.upper().startswith("PRD-"):
+        exact = product_search.get_product_by_code(name)
+        if exact:
+            return [_format_product(exact[0])], None
+
     matches = product_search.search_products(name, limit=50)
     if not matches:
         return [], {"error": f"No product found matching '{name}'", "search_term": name}

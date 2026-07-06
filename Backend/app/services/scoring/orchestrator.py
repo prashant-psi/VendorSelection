@@ -5,6 +5,9 @@ from app.ml import xgboost_scorer
 from app.models.procurement_request import ProcurementRequest
 from app.repositories import ml_training
 
+from app.services.procurement.filters import build_procurement_sql_filters
+
+from .advisory import build_filter_advisory, build_quantity_advisory
 from .blend import blend_rule_and_ml_scores
 from .candidates import load_scoring_candidates
 from .rule_engine import compute_rule_scores
@@ -49,12 +52,23 @@ def get_merged_vendor_ranking(procurement_request: ProcurementRequest) -> dict[s
 def _build_ranking_response(procurement_request: ProcurementRequest) -> dict[str, Any]:
     candidate_rows = load_scoring_candidates(procurement_request)
     if not candidate_rows:
+        filters = build_procurement_sql_filters(
+            required_quantity=procurement_request.required_quantity,
+            budget_usd=procurement_request.budget_usd,
+            required_by_date=procurement_request.required_by_date,
+        )
+        filter_advisory = build_filter_advisory(
+            procurement_request.product_id,
+            required_quantity=filters.get("min_qty"),
+            max_lead_days=filters.get("max_lead_days"),
+        )
         return {
             "procurement_request": procurement_request.model_dump(),
             "scoring_method": "none",
             "ml_weight": 0.0,
             "rule_weight": 1.0,
             "rankings": [],
+            "filter_advisory": filter_advisory,
         }
 
     vendors = [dict(vendor) for vendor in candidate_rows]
@@ -68,12 +82,20 @@ def _build_ranking_response(procurement_request: ProcurementRequest) -> dict[str
     for index, vendor in enumerate(vendors, start=1):
         vendor["rank"] = index
 
+    required_qty = procurement_request.required_quantity
+    advisory = build_quantity_advisory(
+        procurement_request.product_id,
+        required_qty,
+        vendors,
+    )
+
     return {
         "procurement_request": procurement_request.model_dump(),
         "scoring_method": "merged" if ml_available else "rule_only",
         "ml_weight": ml_weight if ml_available else 0.0,
         "rule_weight": round(1.0 - ml_weight, 4) if ml_available else 1.0,
         "rankings": vendors,
+        "quantity_advisory": advisory,
     }
 
 

@@ -1,4 +1,5 @@
 import json
+from datetime import date
 from typing import Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -23,8 +24,9 @@ def extract_fields_from_message(message: str,previous: dict[str, Any]) ->LlmExtr
         llm = get_llm().with_structured_output(
             LlmExtractedFields
         )
+        today = date.today().strftime("%Y-%m-%d")
         messages = [
-            SystemMessage(content=EXTRACTION_SYSTEM),
+            SystemMessage(content=EXTRACTION_SYSTEM.format(today=today)),
             HumanMessage(
                 content=f"""
                         Previous extracted fields:
